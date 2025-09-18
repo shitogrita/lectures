@@ -178,4 +178,45 @@ public:
     }
 };
 ```
+## Идея Ticket locl
 
+```cpp
+my_ticket = next_free_ticket_.fetch_add(1) 
+```
+автомат для выдачи последовательных номерков
+**честный (fair)** спинлок - поткои получают блокировку в том порядке, в котормо они ее запросили 
+
+## Busy wating
+крутимся до тех пор пока другой процессор пе отпустит спинлок:
+```cpp
+void lock() {
+    while (locked_.exchange(true)) {
+        ; // backoff
+    }
+}
+```
+
+```cpp
+void lock() {
+    size_t my_ticket = next_free_ticket_.fetch_add(1);
+    while (my_tickt != owner_ticket_.load()) {
+        ; //backoff;
+    }
+}
+```
+такой паттрен ожидания называют **busy wating** или **spinning**
+
+
+// есть смысл описать еще тут про **pause/ yield**
+
+## SpinWait
+мы будет использовать класс twist::untill::SpinWait
+```cpp
+void lock() {
+    Spinwait  spin_wait;
+    while (locked_.exchange(true)) {
+        spin_wait();
+    }
+}
+```
+он адаптивный - начинаеться с pause, а потом сдаеться и переходит в yield
