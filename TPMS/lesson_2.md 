@@ -1,0 +1,37 @@
+# thread pool
+пул потоков 
+
+```cpp
+// пул из 4 потоков 
+tp::ThreadPool pool{ /*threads=*/ 4};
+
+// submit task to thread pool 
+// submit спсособен передать задачу потоку
+pool.submit([] () {
+    std::this_thread::sleep_for(3s); // <- Блокировка потока  
+    std::cout << "Do not block worker threads" << std::endl;
+});
+```
+  
+## TinyFiber - цепочка задач(граф) ь  
+
+```cpp
+using namespace tinyfibers;
+
+int main() {
+    // стартуем планировщик и запускаем в нем файбер
+    // исполняющий переданную лямбду
+    RunScheduler([]() {
+        std::cout << "hello from paren" << std::ensl;
+        // зупаскаем еще один файбер
+        // управление при этом у текущего файбера 
+        Joinhandle child = Spawn([]() {
+            std::cout << "hello from child" << std::endl;
+        });
+        child.Join(); // блокируем текузий файбер до заверщения дочернего
+        std::cout << "Child finished " << std::endl;
+    });
+    // вызов RunScheduler завершиться когда не отсанетсья  шотовых исполняемых файберов  
+    retun 0;
+}
+```
